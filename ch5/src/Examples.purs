@@ -57,7 +57,7 @@ lzs :: Array Int -> Array Int
 lzs [] = []
 lzs xs = case sum xs of
            0 -> xs
-           _ -> unsafePartial tail xs
+           _ -> lzs (unsafePartial tail xs)
 
 partialFunction :: Boolean -> Boolean
 partialFunction = unsafePartial (\true -> true)
