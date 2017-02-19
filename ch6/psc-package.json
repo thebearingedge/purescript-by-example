@@ -1,0 +1,9 @@
+{
+    "name": "ch6",
+    "set": "psc-0.10.5",
+    "source": "https://github.com/purescript/package-sets.git",
+    "depends": [
+        "psci-support",
+        "prelude"
+    ]
+}
