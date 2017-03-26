@@ -2,11 +2,12 @@ module Stream where
 
 import Prelude ((<>))
 import Data.Array as Array
+import Data.Functor (map)
 import Data.Maybe (Maybe(..))
 import Data.Monoid (class Monoid, mempty)
 import Data.String as String
 
-class Stream stream element where
+class Stream stream element | stream -> element where
   uncons :: stream -> Maybe { head :: element, tail :: stream }
 
 instance streamArray :: Stream (Array a) a where
@@ -20,3 +21,6 @@ foldStream f stream =
   case uncons stream of
     Nothing             -> mempty
     Just { head, tail } -> f head <> foldStream f tail
+
+genericTail :: forall s e. Stream s e => s -> Maybe s
+genericTail xs = map _.tail (uncons xs)

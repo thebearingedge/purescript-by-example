@@ -5,9 +5,12 @@ import Data.BooleanAlgebra ((&&))
 import Data.Eq (class Eq, (==))
 import Data.Foldable (class Foldable, foldl, foldr, foldMap)
 import Data.Functor (class Functor, map)
+import Data.Monoid (class Monoid)
+import Data.Monoid.Additive (Additive(..))
 import Data.Ord (class Ord, Ordering(..), compare)
 import Data.Semigroup (class Semigroup, (<>))
 import Data.Show (class Show, show)
+import Prelude ((-))
 
 instance showShape :: Show Shape where
   show (Circle c r) =
@@ -87,7 +90,29 @@ instance ordExtended :: Ord a => Ord (Extended a)
 
 data OneMore f a = OneMore a (f a)
 
-instance foldableOneMore :: Foldable f => Foldable (OneMore f) where
-  foldl f x (OneMore y xs) = foldl f (f x y) xs
-  foldr f x (OneMore y xs) = f y (foldr f x xs)
-  foldMap f (OneMore y xs) = (f y) <> (foldMap f xs)
+instance foldableOneMore :: Foldable f => Foldable (OneMore f)
+  where
+    foldl f x (OneMore y xs) = foldl f (f x y) xs
+    foldr f x (OneMore y xs) = f y (foldr f x xs)
+    foldMap f (OneMore y xs) = (f y) <> (foldMap f xs)
+
+class Monoid m <= Action m a
+  where
+    act :: m -> a -> a
+
+instance repeatAction :: Action (Additive Int) String
+  where
+    act (Additive t) s = repeat t s
+      where
+        repeat 0 _ = ""
+        repeat times string = string <> repeat (times - 1) string
+
+instance eachAction :: Action m a => Action m (Array a)
+  where
+    act x ys = map (act x) ys
+
+newtype Self m = Self m
+
+instance selfAction :: Monoid m => Action m (Self m)
+  where
+    act _ (Self x) = Self (x <> x)
